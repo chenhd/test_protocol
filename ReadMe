@@ -1,0 +1,14 @@
+echo_server <=> proxy <=> echo_client
+
+
+protocol_format:        length(int) + pid(int) + data(bytes)
+
+echo_client: 一个简单的客户端程序，以 protocol_format 的协议格式发送一系列固定内容的协议包，并接收回包，可发往代理或是直接发往服务器
+echo_server: 一个简单的服务器，直接返回请求的内容，由于请求设定是带有协议格式，因此返回便等同有了协议格式
+modify_data: 监听同名的json配置文件，将该文件的修改内容实时更新到运行时用于修改协议的字典，需要一定的内容格式才能生效
+proxy：代理程序，转发与解析client与server之间的数据，在转发client至server的过程中，加入了modify_protocol接口的调用，进行数据包的更改
+
+启动顺序：
+先启动 echo_server 与 proxy ，而后再启动 echo_client。
+proxy 在接收到来自 echo_client 的连接请求时，才会与 echo_server 建立连接。
+在启动 proxy 时会导入 modify_data，自动监听配置文件的内容修改。
